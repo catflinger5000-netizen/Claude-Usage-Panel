@@ -1,0 +1,6 @@
+{
+  "name": "claude-usage-panel",
+  "description": "A Claude Code pane with live token usage, context window, cost and plan limits",
+  "owner": { "name": "catflinger5000-netizen" },
+  "plugins": [{ "name": "usage-panel", "source": "./" }]
+}

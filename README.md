@@ -15,13 +15,23 @@ Subagent tokens are counted in the totals but not as replies.
 
 ## Install
 
-Copy this folder into your Claude Code mods directory as `usage-panel`:
+At the prompt of a Claude Code terminal session, including a cloud session:
 
-```bash
-git clone https://github.com/catflinger5000-netizen/claude-usage-panel.git ~/.claude/mods/usage-panel
+```
+/plugin install usage-panel --marketplace catflinger5000-netizen/claude-usage-panel
 ```
 
-Start a new session and the pane opens on its own.
+Answer `y` to add the marketplace, then press Enter to pick the user scope. The pane opens straight away, and in every session after that.
+
+From a shell:
+
+```bash
+claude plugin install usage-panel --marketplace catflinger5000-netizen/claude-usage-panel
+```
+
+In the desktop app, where `/plugin` doesn't run: click + next to the prompt box, then Plugins → Add marketplace with `catflinger5000-netizen/claude-usage-panel`, then Add plugin.
+
+This repository is private, so the install only works where git already has a GitHub login that can read it (an SSH key, or `gh auth login` then `gh auth setup-git`).
 
 ## Commands
 
