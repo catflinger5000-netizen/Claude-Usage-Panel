@@ -1,0 +1,6 @@
+{
+  "name": "usage-panel",
+  "version": "0.2.2",
+  "description": "Right-hand pane with live token usage, context window, cost, plan limits and lifetime totals",
+  "types": "./types/index.d.ts"
+}
