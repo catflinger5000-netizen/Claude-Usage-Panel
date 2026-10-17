@@ -121,7 +121,7 @@ test('the credit balance counts down only while a plan limit is used up', async 
   expect(status.text).toContain('About $10.28 left')
 })
 
-test('/usage-panel answers in text where no surface can draw the pane', async ($, on) => {
+test('/usage-panel says why where no surface can draw the pane', async ($, on) => {
   memoryStore(on)
   on('turn.complete', (_$, e) => ({ text: e.answer }))
   on('ui.open', () => ({ value: { isPlaced: false, reason: 'no surface places panes' } }))
@@ -130,5 +130,16 @@ test('/usage-panel answers in text where no surface can draw the pane', async ($
   const r = await $.command.run({ command: 'usage-panel', args: '' })
   expect(r.text).toContain('Tokens: 1500 this session')
   expect(r.text).toContain('Model: opus-5-5')
-  expect(r.text).toContain("The pane can't be shown here (no surface places panes)")
+  expect(r.text).toContain("The pane can't be shown here (no surface places panes).")
+})
+
+test('/usage-panel prints the figures even when the pane opens', async ($, on) => {
+  memoryStore(on)
+  on('turn.complete', (_$, e) => ({ text: e.answer }))
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  await $.turn.complete(turn('claude-opus-5-5'))
+
+  const r = await $.command.run({ command: 'usage-panel', args: '' })
+  expect(r.text).toContain('Tokens: 1500 this session')
+  expect(r.text).toContain('Usage pane opened. (usage-panel 0.2.4)')
 })

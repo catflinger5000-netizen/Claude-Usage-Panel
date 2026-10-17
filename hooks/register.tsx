@@ -7,6 +7,8 @@ const PANE = 'usage'
 const TITLE = 'Usage'
 const STORE_KEY = 'lifetime'
 const CREDITS_KEY = 'credits'
+// Shown in /usage-panel's reply, so a cloud session's copy can be told apart from an older one.
+const VERSION = '0.2.4'
 
 const ZERO: Tokens = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }
 
@@ -230,10 +232,11 @@ export const register: Register = on => {
       }
     }
     const opened = await $.ui.open({ id: PANE, title: TITLE })
-    if (opened.isPlaced) return { text: 'Usage pane opened.' }
 
-    // Some surfaces (a cloud session's page, a -p run) draw no panes: answer in text instead.
-    return { text: `${await summary($)}\n\nThe pane can't be shown here (${opened.reason}), so these are the same figures as text.` }
+    // The figures always come as text too: a cloud session's page can count the pane as
+    // placed and still not show it, and a -p run draws no panes at all.
+    const note = opened.isPlaced ? 'Usage pane opened.' : `The pane can't be shown here (${opened.reason}).`
+    return { text: `${await summary($)}\n\n${note} (usage-panel ${VERSION})` }
   })
 
   on('prompt.submit', async ($, e, next) => {
