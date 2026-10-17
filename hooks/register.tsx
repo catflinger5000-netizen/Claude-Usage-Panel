@@ -154,6 +154,27 @@ async function loadLifetime($: EngineInterface): Promise<Lifetime> {
   return first
 }
 
+// The pane's main figures as plain lines, for /usage-panel where no pane can be drawn.
+async function summary($: EngineInterface): Promise<string> {
+  const s = await read($, live)
+  const life = await read($, lifetime)
+  const wallet = await read($, credits)
+  const lines = [
+    s.contextPercent === undefined
+      ? 'Context window: waiting for the first reply'
+      : `Context window: ${s.contextPercent}% (${short(s.contextTokens ?? 0)} of ${short(s.contextWindow)} tokens)`,
+    ...s.limits.map(l => `${limitTitle(l.kind)}: ${l.percentUsed}% used${l.resetsAt ? ` · ${resetText(l.resetsAt)}` : ''}`),
+  ]
+  if (wallet) lines.push(`Usage credits (est.): ${usd(Math.max(0, wallet.balanceUsd - wallet.spentUsd))}`)
+  lines.push(
+    `Cost: ${usd(s.costUsd)} this session · ${usd(life.costUsd)} all time`,
+    `Tokens: ${short(total(s))} this session · ${short(total(life))} all time`,
+    `Messages: ${s.messages} · Replies: ${s.replies} · Sessions: ${short(life.sessions)}`,
+  )
+  if (s.model !== '') lines.push(`Model: ${s.model.replace(/^claude-/, '')}`)
+  return lines.join('\n')
+}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const result = await next(e)
@@ -208,9 +229,11 @@ export const register: Register = on => {
           : 'No balance set. Copy it from Settings → Usage → Current balance: /usage-panel credits 12.78',
       }
     }
-    await $.ui.open({ id: PANE, title: TITLE })
+    const opened = await $.ui.open({ id: PANE, title: TITLE })
+    if (opened.isPlaced) return { text: 'Usage pane opened.' }
 
-    return { text: 'Usage pane opened.' }
+    // Some surfaces (a cloud session's page, a -p run) draw no panes: answer in text instead.
+    return { text: `${await summary($)}\n\nThe pane can't be shown here (${opened.reason}), so these are the same figures as text.` }
   })
 
   on('prompt.submit', async ($, e, next) => {

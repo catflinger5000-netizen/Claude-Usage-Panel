@@ -120,3 +120,15 @@ test('the credit balance counts down only while a plan limit is used up', async 
   const status = await $.command.run({ command: 'usage-panel', args: 'credits' })
   expect(status.text).toContain('About $10.28 left')
 })
+
+test('/usage-panel answers in text where no surface can draw the pane', async ($, on) => {
+  memoryStore(on)
+  on('turn.complete', (_$, e) => ({ text: e.answer }))
+  on('ui.open', () => ({ value: { isPlaced: false, reason: 'no surface places panes' } }))
+  await $.turn.complete(turn('claude-opus-5-5'))
+
+  const r = await $.command.run({ command: 'usage-panel', args: '' })
+  expect(r.text).toContain('Tokens: 1500 this session')
+  expect(r.text).toContain('Model: opus-5-5')
+  expect(r.text).toContain("The pane can't be shown here (no surface places panes)")
+})
